@@ -86,6 +86,8 @@ Fazelnia et al.\ (2024)~\cite{10.1145/3691620.3695302} build \emph{SAT-LLM}, whi
     \end{tabular}
 \end{table}
 
+\todo{Add the gap and what is our contribution, basically summarize the next section}
+
 %--------------------------------------------------------
 %--------------------------------------------------------
 %--------------------------------------------------------
@@ -99,6 +101,10 @@ While prior controlled-language frontends~\cite{giannakopoulou2020fret,nowakowsk
 \subsection{Formalism requirements and its design}
 
 The formalism must satisfy the properties listed below. Each property is paired with a concrete use case expressed in abstract placeholders (signals $A$, $B$; events $e_A$, $e_B$; etc.) and a brief note on the construct the formalism provides to address it.
+
+\todo{Fix ordering}
+
+\todo{Inlcude a requirement and test case example, so the reader can have a better understanding before reading the rest}
 
 \paragraph{Meta-level properties.}
 
@@ -130,6 +136,8 @@ The formalism must satisfy the properties listed below. Each property is paired 
 
 \textbf{Counting event occurrences within an interval.} The formalism shall count how many times an event occurred within a given interval, with control over whether interval endpoints are included. \textit{Example:} ``the number of occurrences of $e_A$ in the half-open interval $(t_1,\, t_2]$.'' \textit{Solution:} $\mathit{EvtOccCount}_\rho(ev,\, i)$ returns the count.
 
+\todo{Rest is not reviewed}
+
 \paragraph{Conditional and logical structure.}
 
 \textbf{Value-conditional branches.} The formalism shall support constraints that branch on the current value of an entity. \textit{Example:} ``If $A$ is true then $B$ equals $X$; otherwise $B$ equals $Y$.'' \textit{Solution:} The comparison predicate $\mathit{Cmp}$ and the implication predicate $\mathit{Implies}(A,\, B)$ together express value-guarded branches.
@@ -150,19 +158,28 @@ The formalism must satisfy the properties listed below. Each property is paired 
 
 \textbf{Existence and global constraints.} The formalism shall express both ``at some point in the trace'' and ``at every time point in the trace''. \textit{Example:} ``Eventually $A$ equals $5$''; ``$A$ is always non-negative''. \textit{Solution:} The temporal constructs $\mathit{Eventually}(\psi) \Leftrightarrow \exists t :\; \psi(\rho,\, t)$ and $\mathit{Always}(\psi) \Leftrightarrow \forall t :\; \psi(\rho,\, t)$.
 
+\todo{Preferably without human in the loop}
+
 %--------------------------------------------------------
 %--------------------------------------------------------
 \subsection{Formalism design decisions}
 
+\todo{Might already be covered by previous section}
+
 %--------------------------------------------------------
 %--------------------------------------------------------
 \subsection{Formalism definition}
+
+\todo{Add an appendix}
+\todo{Add appendix with examples}
 
 %--------------------------------------------------------
 %--------------------------------------------------------
 \subsection{Known limitations and possible future extensions}
 
 \todo{Although this work claims that the formalism should be close to english and is close in the sense that it uses english words, the words themselves might not appear in a similar order than they would in english. This might be a limitation.}
+
+\todo{Add limitations from formalism document}
 
 %--------------------------------------------------------
 %--------------------------------------------------------
