@@ -6,12 +6,12 @@
 
 With the rise of Large Language Models (LLMs) and the increase
 in their capabilities, companies are motivated to use LLMs for
-automation tasks, including testing and its tooling. However, LLMs
+automation tasks, including testing and the tooling for it. However, LLMs
 are not plug-and-play; specialized tooling is often required to
 produce reliable outputs.
 This work defines a formal base into which LLMs rewrite requirements
 and test cases written in natural language, so that the result is
-parsable by coverage checking systems.
+parsable by test coverage checking systems.
 
 There is an increasing demand to instrument systems in natural
 language, including the specification of requirements and their
@@ -33,37 +33,152 @@ should meet all of the mentioned criteria.
 %--------------------------------------------------------
 %--------------------------------------------------------
 %--------------------------------------------------------
-\section{Existing methods of requirement formalisation -- State of the Art}
+\section{Existing methods of requirement formalisation -- State of the Art}\label{sec:sota}
+
+The translation from natural-language (NL) requirements to formal specifications has long been pursued through controlled-language frontends that constrain the input enough to make it unambiguous and further processable. The recent maturation of large language models has reopened the question of to what degree this translation can be automated without such restrictions, leading to LLM-based pipelines and hybrid approaches that pair LLMs with formal provers and solvers --- the rest of this section surveys that landscape.
+This overview is informed by the recent short survey of Beg et al.\ (2025)~\cite{beg2025survey}, which classifies the LLM-based literature in detail. It is further complemented with controlled-language frontends that the survey only briefly covers.
+Table~\ref{tab:sota} summarises the systems discussed in this section.
+
+\paragraph{Controlled-language frontends.}
+The longest-lived line of work attacks the problem at the \emph{input} side by constraining the natural language itself.
+Nowakowski et al.\ (2013)~\cite{nowakowski2013requirements} developed the \emph{Requirements Specification Language} and the \emph{ReDSeeDS} platform, which couples a constrained-NL requirements notation with automated transformations into code.
+Ghosh et al.\ (2016)~\cite{Ghosh2016} present \emph{ARSENAL}, an NLP-based framework that extracts formal requirement specifications from natural language with automatic verification.
+NASA's \emph{FRET}, introduced by Giannakopoulou et al.\ (2020)~\cite{giannakopoulou2020fret}, lets engineers write requirements in \emph{FRETISH}, a restricted English with unambiguous semantics that maps deterministically to temporal logic.
+
+\paragraph{LLM-only pipelines.}
+With the rise of large language models, a growing body of work delegates the full translation to the LLM itself.
+Nayak et al.\ (2022)~\cite{Req2SpecPaper} present \emph{Req2Spec}, an NLP pipeline that maps natural-language requirements onto the pattern-based formal specifications consumed by HANFOR; on 222 BOSCH automotive requirements it correctly formalises 71\%.
+Cosler et al.\ (2023)~\cite{cosler2023nl2specinteractivelytranslatingunstructured} propose \emph{nl2spec}, which uses few-shot prompting of Codex (\texttt{code-davinci-002}) and Bloom-176B to translate unstructured natural language into Linear-time Temporal Logic (LTL), with iterative user refinement of subformulas.
+Fang et al.\ (2024)~\cite{10691792} introduce \emph{AssertLLM}, a three-stage pipeline of customised GPT-4o models (the final stage retrieval-augmented) that generates SystemVerilog Assertions from hardware design specifications with 89\% correctness.
+
+\paragraph{Hybrid LLM + prover systems.}
+The most recent strand pairs an LLM with a formal prover or solver that has the final say on correctness.
+Jiang et al.\ (2022)~\cite{Jiang2022} introduce \emph{Thor}, which couples a 700M-parameter decoder-only transformer with the Isabelle/HOL theorem prover via Sledgehammer-based premise selection (``Hammers''), raising proof success on PISA from 39\% to 57\%.
+Yang et al.\ (2023)~\cite{Yang2023} release \emph{LeanDojo} and the retrieval-augmented prover \emph{ReProver}, a ByT5 encoder-decoder paired with premise retrieval over the Lean mathematics library and benchmarked on 98\,734 theorems.
+Quan et al.\ (2024)~\cite{quan2024verificationrefinementnaturallanguage} propose \emph{Explanation-Refiner}, a refinement loop between an LLM (GPT-4, GPT-3.5-turbo, Llama2-70b, Mixtral-8x7b, or Mistral-small) and the Isabelle/HOL prover that validates and corrects natural-language explanations.
+Fazelnia et al.\ (2024)~\cite{10.1145/3691620.3695302} build \emph{SAT-LLM}, which combines an LLM with an SMT solver to detect conflicting requirements at F1 0.91.
+
+\begin{table}[t]
+    \centering
+    \caption{State-of-the-art systems for natural-language to formal-specification translation discussed in this section, in chronological order within each category. Abbreviations: HITL = human-in-the-loop; NLP = natural language processing; MDD = model-driven development; SAL = Symbolic Analysis Laboratory; LTL = linear-time temporal logic; HANFOR = an industrial requirements-analysis tool that consumes pattern-based formal specifications; SVA = SystemVerilog Assertions; HOL = higher-order logic (as in the Isabelle/HOL theorem prover); SMT = satisfiability modulo theories.}
+    \label{tab:sota}
+    \footnotesize
+    \begin{tabular}{@{}c l c p{0.27\linewidth} p{0.18\linewidth} c@{}}
+        \toprule
+        Ref.                                                         & System              & Year & Models                                             & Target       & HITL \\
+        \midrule
+        \multicolumn{6}{@{}l}{\textit{Controlled-language frontends}}                                                                                                        \\
+        \cite{nowakowski2013requirements}                            & RSL/ReDSeeDS        & 2013 & --- (rule-based)                                   & Code (MDD)   & Yes  \\
+        \cite{Ghosh2016}                                             & ARSENAL             & 2016 & NLP pipeline                                       & SAL/LTL      & No   \\
+        \cite{giannakopoulou2020fret}                                & FRET                & 2020 & --- (rule-based)                                   & LTL          & Yes  \\
+        \midrule
+        \multicolumn{6}{@{}l}{\textit{LLM-only pipelines}}                                                                                                                   \\
+        \cite{Req2SpecPaper}                                         & Req2Spec            & 2022 & NLP pipeline                                       & HANFOR       & No   \\
+        \cite{cosler2023nl2specinteractivelytranslatingunstructured} & nl2spec             & 2023 & Codex, Bloom-176B                                  & LTL          & Yes  \\
+        \cite{10691792}                                              & AssertLLM           & 2024 & GPT-4o                                             & SVA          & No   \\
+        \midrule
+        \multicolumn{6}{@{}l}{\textit{Hybrid LLM + prover systems}}                                                                                                          \\
+        \cite{Jiang2022}                                             & Thor                & 2022 & 700M transformer                                   & Isabelle/HOL & No   \\
+        \cite{Yang2023}                                              & LeanDojo            & 2023 & ByT5 + retrieval                                   & Lean         & No   \\
+        \cite{quan2024verificationrefinementnaturallanguage}         & Explanation-Refiner & 2024 & GPT-4/3.5, Llama2-70b, Mixtral-8x7b, Mistral-small & Isabelle/HOL & No   \\
+        \cite{10.1145/3691620.3695302}                               & SAT-LLM             & 2024 & LLM + SMT solver                                   & SMT          & No   \\
+        \bottomrule
+    \end{tabular}
+\end{table}
 
 %--------------------------------------------------------
 %--------------------------------------------------------
 %--------------------------------------------------------
 %--------------------------------------------------------
-\section{Formalism requirements \& example use cases}
+\section{Contributing by designing a ``close-to-NL'' formalism}
+
+While prior controlled-language frontends~\cite{giannakopoulou2020fret,nowakowski2013requirements,Ghosh2016} and LLM-based translators~\cite{cosler2023nl2specinteractivelytranslatingunstructured} target a single fixed logic --- typically LTL or a tool-specific pattern language --- none of the systems surveyed in Section~\ref{sec:sota} position their formalism around predicate-level matchability between requirements and test cases for coverage-gap detection, nor as a logic-agnostic intermediate explicitly designed to be the translation target for LLMs. The formalism presented in this section is designed around precisely these two properties.
 
 %--------------------------------------------------------
 %--------------------------------------------------------
-\section{Formalism design decisions}
+\subsection{Formalism requirements and its design}
+
+The formalism must satisfy the properties listed below. Each property is paired with a concrete use case expressed in abstract placeholders (signals $A$, $B$; events $e_A$, $e_B$; etc.) and a brief note on the construct the formalism provides to address it.
+
+\paragraph{Meta-level properties.}
+
+\textbf{Logic-agnostic representation of system behaviour in time.} The formalism shall not commit to a specific underlying logic, so that a single requirement representation can be retargeted to different verification back-ends. \textit{Solution:} A requirement is represented as a composition of two kinds of building blocks: (i) ordinary expressions and predicates that, when evaluated against a trace (the same kind of object a test case produces), yield concrete values or truth values at each point in time; and (ii) temporal predicates that aggregate those point-in-time predicates into a single truth value over the entire trace. The semantics of each building block is defined directly in set-theoretic terms over traces and time, independent of any target back-end. Every temporal predicate has a direct LTL (or metric-LTL) equivalent and a corresponding timed-automaton construction.
+
+\textbf{Mechanical coverage-gap detection.} Given a set of formalised requirements and a set of formalised test cases, the formalism shall enable a checker to determine which requirement conditions are not exercised by any test case. \textit{Solution:} Requirements and test cases are formalised over the same entities and the same predicates, so that the same sub-formulas appear on both sides. A checker can then evaluate, for each test case, which meaningful combinations of sub-formulas inside a requirement's formula are driven to true and which to false, and from that compute the fraction of relevant combinations that the test suite exercises.
+
+\textbf{Extensible domains.} Real-world requirements draw on an open-ended range of kinds of things in a system (signals, registers, channels, states, and so on) and of events that can happen to them (a register being written, a channel transmitting a value, a state being entered), and it is unrealistic to fix a closed catalogue up front that covers every domain the formalism may ever be applied to. The formalism shall therefore keep these catalogues extensible. \textit{Example:} To support a new entity kind $C$ representing network packets, only the relevant catalogue is widened; the rest of the formalism is untouched. \textit{Solution:} The set of entity kinds, the set of value types, the assignment of permitted attributes to each entity kind, and the assignment of permitted events (parameterised by the entity they happen to) to each entity kind are all parameters of the formalism rather than fixed sets. Adding a new entry to any of them requires only registering it in the relevant catalogue; existing constructs continue to work unchanged.
+
+\paragraph{Time and values.}
+
+\textbf{Discrete and continuous time.} The formalism shall support both discrete-time and continuous-time requirements within a single vocabulary. \textit{Example:} A discrete-time requirement says ``at every step, $A$ is incremented by $3$''; a continuous-time requirement says ``$e_B$ must occur within $2$ seconds of $e_A$''. \textit{Solution:} The time set $T$ has two flavours: $T_D = \mathbb{N} \cup \{\infty\}$ for discrete time and $T_C = \mathbb{R}_{\geq 0} \cup \{\infty\}$ for continuous time. Each requirement carries a $\mathit{flavour} \in \{\text{Discrete},\, \text{Continuous}\}$ field that fixes $T$ for its scope.
+
+\textbf{Entities of multiple kinds carry values, and operations modify them in test cases.} The formalism shall represent entities of different kinds (registers, states, communication channels, computed signals, etc.) and let each carry a value at any given time point. It shall also provide a way for test cases to describe how those values change over time. \textit{Example:} Register $A$, state $B$, and channel $C$ each have a value at every relevant time point; a test case may, for instance, write a new value into $A$, transition $B$ to a new state, or transmit a value through $C$. \textit{Solution:} The formalism defines an extensible catalogue of entity kinds (currently signal, storage, event, event-trigger, channel, state, value, abstract, and set), and a valuation maps each entity to its value at each time point of a trace. Modifications of those values are expressed through \emph{operations} --- an extensible catalogue of actions, currently including \emph{calculate}, \emph{write}, \emph{read}, \emph{fire}, \emph{set\_state}, \emph{transmit}, \emph{receive}, \emph{insert}, \emph{remove}, and \emph{clear} --- that a test case fires at specific time points to drive the trace. Each entity kind has its own subset of applicable operations (e.g.\ \emph{write} applies to storage, \emph{fire} to event-triggers, \emph{transmit} to channels).
+
+\textbf{Initial-value constraints.} The formalism shall be able to constrain the value of an entity at the initial time point. \textit{Example:} ``Signal $A$ has initial value $0$.'' \textit{Solution:} The temporal construct $\mathit{Initial}(\psi) \Leftrightarrow \psi(\rho,\, 0)$ asserts a point-in-time predicate at time $0$.
+
+\textbf{Reference to an entity's value at another time point.} The formalism shall allow a constraint to refer to the value an entity had (or will have) at an earlier or later time point, enabling recurrences, toggles, and look-ahead conditions. \textit{Example:} ``$A(\mathit{Now}) = A(\mathit{Now}-1) + 3$''; ``$B$ equals the negation of $B$'s previous value''; or ``$C$ at the next step equals the current value of $D$''. \textit{Solution:} $\mathit{Val}_\rho(e,\, t)$ returns the value of $e$ at any time $t$, past or future; for discrete time, $\mathit{Prev}$, $\mathit{Next}$, and $\mathit{RelTime}$ shift the time argument backward or forward; $\mathit{ValBefore}_\rho(e,\, t)$ exposes the left limit at $t$.
+
+\textbf{Static entity-attribute access.} The formalism shall expose static attributes of an entity (independent of trace and time). \textit{Example:} The address of register $A$ is the constant $\mathtt{0xAA000018}$ and can be referenced as such. \textit{Solution:} Static attributes are stored in an entity's modifier map $\mu_e : \mathit{ModKey} \rightharpoonup \mathit{ModVal}$; accessors such as $\mathit{Addr}(e) = \mu_e(\mathit{address})$ retrieve them without reference to $\rho$ or $t$.
+
+\paragraph{Events and triggers.}
+
+\textbf{Event occurrence at a given time point.} The formalism shall express that an event occurs at a particular time point. \textit{Example:} ``$e_A$ is happening at $t$.'' \textit{Solution:} The predicate $\mathit{Happening}(e,\, t)$, where $e$ is an entity of type \texttt{Event}.
+
+\textbf{Past-event semantics.} The formalism shall express that an event has occurred at some point up to the current time. \textit{Example:} ``$e_A$ has happened at least once.'' \textit{Solution:} The predicate $\mathit{HasHappened}_\rho(e,\, t)$.
+
+\textbf{Reference to event-occurrence times.} The formalism shall expose the time of a specific past or future occurrence of an event. \textit{Example:} ``the time of the most recent occurrence of $e_A$.'' \textit{Solution:} $\mathit{LastOcc}_\rho(ev,\, t,\, n)$ returns the interval spanning the $n$ most recent occurrences of $ev$ up to $t$; $\mathit{FirstOcc}_\rho$ does the same in the forward direction.
+
+\textbf{Counting event occurrences within an interval.} The formalism shall count how many times an event occurred within a given interval, with control over whether interval endpoints are included. \textit{Example:} ``the number of occurrences of $e_A$ in the half-open interval $(t_1,\, t_2]$.'' \textit{Solution:} $\mathit{EvtOccCount}_\rho(ev,\, i)$ returns the count.
+
+\paragraph{Conditional and logical structure.}
+
+\textbf{Value-conditional branches.} The formalism shall support constraints that branch on the current value of an entity. \textit{Example:} ``If $A$ is true then $B$ equals $X$; otherwise $B$ equals $Y$.'' \textit{Solution:} The comparison predicate $\mathit{Cmp}$ and the implication predicate $\mathit{Implies}(A,\, B)$ together express value-guarded branches.
+
+\textbf{Multi-condition guards.} The formalism shall combine conditions of different kinds (event happenings, value comparisons, occurrence counts, historical values) into a single guard. \textit{Example:} ``If $e_A$ occurs and $B > 100$ and $e_C$ has occurred at least twice, then $D$ must follow.'' \textit{Solution:} $\mathit{AllOf}(C)$ takes a finite set of predicates of any kind and forms their conjunction; the formalism's predicates form a uniform space $\mathbf{Pred}$, so event-, value-, count-, and history-based predicates can all be conjoined.
+
+\textbf{Disjunctive triggers.} The formalism shall express a consequence that follows from any one of several alternative triggers. \textit{Example:} ``If $e_A$ or $e_B$ or $e_C$ occurs, then $D$ must hold.'' \textit{Solution:} $\mathit{AnyOf}(C)$ forms the disjunction of a finite set of predicates and may be used as the cause of a $\mathit{Causes}$ construct.
+
+\textbf{Set-valued quantification.} The formalism shall quantify over a finite set of entities and reason about properties of the subset that satisfies a predicate. \textit{Example:} ``For every entity in $\{A, B, C, D\}$, predicate $P$ holds''; or ``at most two entities in $\{A, B, C, D\}$ have a value greater than $10$.'' \textit{Solution:} The Set entity kind together with the quantifiers $\mathit{ForAll}(S,\, P)$ and $\mathit{Exists}(S,\, P)$, plus $\mathit{Filter}$ and $\mathit{Size}$ for cardinality reasoning over the subset that satisfies a predicate.
+
+\paragraph{Temporal patterns.}
+
+\textbf{Sequencing.} The formalism shall require multiple actions to occur in a specified order. \textit{Example:} ``$e_A$ then $e_B$ then $e_C$.'' \textit{Solution:} $\mathit{Sequence}(\psi_1,\, \ldots,\, \psi_n) \Leftrightarrow \exists t_1 \leq t_2 \leq \cdots \leq t_n :\; \psi_i(\rho,\, t_i) \text{ for all } i$.
+
+\textbf{Time-bounded causation.} The formalism shall require an effect to occur within a bounded duration of a cause. \textit{Example:} ``If $e_A$ occurs, $e_B$ must occur within $2$ seconds.'' \textit{Solution:} $\mathit{CausesWithin}(\psi_{\mathit{cond}},\, \psi_{\mathit{effect}},\, d) \Leftrightarrow \forall t :\; \psi_{\mathit{cond}}(\rho,\, t) \Rightarrow \exists t' \in [t,\, t+d] :\; \psi_{\mathit{effect}}(\rho,\, t')$.
+
+\textbf{Sliding temporal windows.} The formalism shall reason about a window of fixed length ending at the current time. \textit{Example:} ``$e_A$ occurred at least twice in the last $10$ seconds.'' \textit{Solution:} An interval constructor applied to $\mathit{Now}$ produces the window, e.g.\ $\mathit{MkIntervalOO}(\mathit{Now} - d,\, \mathit{Now})$, which can then be passed to $\mathit{EvtOccCount}_\rho$ or used as an argument to a $\mathit{ForAll}/\mathit{Exists}$ over time.
+
+\textbf{Existence and global constraints.} The formalism shall express both ``at some point in the trace'' and ``at every time point in the trace''. \textit{Example:} ``Eventually $A$ equals $5$''; ``$A$ is always non-negative''. \textit{Solution:} The temporal constructs $\mathit{Eventually}(\psi) \Leftrightarrow \exists t :\; \psi(\rho,\, t)$ and $\mathit{Always}(\psi) \Leftrightarrow \forall t :\; \psi(\rho,\, t)$.
 
 %--------------------------------------------------------
 %--------------------------------------------------------
-\section{Known limitations and possible future extensions}
+\subsection{Formalism design decisions}
 
 %--------------------------------------------------------
 %--------------------------------------------------------
-\section{Compatibility with well-known formal specification methods}
+\subsection{Formalism definition}
+
+%--------------------------------------------------------
+%--------------------------------------------------------
+\subsection{Known limitations and possible future extensions}
+
+\todo{Although this work claims that the formalism should be close to english and is close in the sense that it uses english words, the words themselves might not appear in a similar order than they would in english. This might be a limitation.}
+
+%--------------------------------------------------------
+%--------------------------------------------------------
+\subsection{Compatibility with well-known formal specification methods}
 
 %--------------------------------------------------------
 %--------------------------------------------------------
 %--------------------------------------------------------
 %--------------------------------------------------------
-\section{Requirement and test case examples}
+\subsection{Requirement and test case examples}
 
 %--------------------------------------------------------
 %--------------------------------------------------------
 %--------------------------------------------------------
 %--------------------------------------------------------
-\section{Future work}
+\subsection{Future work}
 
 \section{Conclusions}
 %--------------------------------------------------------

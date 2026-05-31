@@ -1,5 +1,71 @@
 \makeatletter
 \makeatother
-\begin{thebibliography}{}
+\begin{thebibliography}{10}
+
+\bibitem{beg2025survey}
+{\sc\bgroup}Beg{\egroup}, A., {\sc\bgroup}O'Donoghue{\egroup}, D. and~{\sc\bgroup}Monahan{\egroup}, R.
+\newblock {\em A Short Survey on Formalising Software Requirements with Large Language Models}.
+\newblock 2025.
+\newblock Available at: ~{\small\url{https://arxiv.org/abs/2506.11874}}.
+
+\bibitem{cosler2023nl2specinteractivelytranslatingunstructured}
+{\sc\bgroup}Cosler{\egroup}, M., {\sc\bgroup}Hahn{\egroup}, C., {\sc\bgroup}Mendoza{\egroup}, D., {\sc\bgroup}Schmitt{\egroup}, F. and~{\sc\bgroup}Trippel{\egroup}, C.
+\newblock {\em Nl2spec: Interactively Translating Unstructured Natural Language to Temporal Logics with Large Language Models}.
+\newblock 2023.
+\newblock Available at: ~{\small\url{https://arxiv.org/abs/2303.04864}}.
+
+\bibitem{10691792}
+{\sc\bgroup}Fang{\egroup}, W., {\sc\bgroup}Li{\egroup}, M., {\sc\bgroup}Li{\egroup}, M., {\sc\bgroup}Yan{\egroup}, Z., {\sc\bgroup}Liu{\egroup}, S. et~al.
+\newblock {AssertLLM}: Generating Hardware Verification Assertions from Design Specifications via Multi-LLMs.
+\newblock In:~{\em 2024 IEEE LLM Aided Design Workshop (LAD)}.
+\newblock 2024, p.~1--1.
+
+\bibitem{10.1145/3691620.3695302}
+{\sc\bgroup}Fazelnia{\egroup}, M., {\sc\bgroup}Mirakhorli{\egroup}, M. and~{\sc\bgroup}Bagheri{\egroup}, H.
+\newblock Translation Titans, Reasoning Challenges: Satisfiability-Aided Language Models for Detecting Conflicting Requirements.
+\newblock In:~{\em Proceedings of the 39th IEEE/ACM International Conference on Automated Software Engineering (ASE '24)}.
+\newblock New York, NY, USA: Association for Computing Machinery, 2024, p.~2294--2298.
+
+\bibitem{Ghosh2016}
+{\sc\bgroup}Ghosh{\egroup}, S., {\sc\bgroup}Elenius{\egroup}, D., {\sc\bgroup}Li{\egroup}, W., {\sc\bgroup}Lincoln{\egroup}, P., {\sc\bgroup}Shankar{\egroup}, N. et~al.
+\newblock {ARSENAL}: Automatic Requirements Specification Extraction from Natural Language.
+\newblock In: {\sc\bgroup}Rayadurgam{\egroup}, S. and~{\sc\bgroup}Tkachuk{\egroup}, O.,  ed.~{\em NASA Formal Methods}.
+\newblock Cham: Springer International Publishing, 2016, p.~41--46.
+
+\bibitem{giannakopoulou2020fret}
+{\sc\bgroup}Giannakopoulou{\egroup}, D., {\sc\bgroup}Mavridou{\egroup}, A., {\sc\bgroup}Rhein{\egroup}, J., {\sc\bgroup}Pressburger{\egroup}, T., {\sc\bgroup}Schumann{\egroup}, J. et~al.
+\newblock Formal Requirements Elicitation with {FRET}.
+\newblock In:~{\em Joint Proceedings of REFSQ-2020 Workshops, Doctoral Symposium, Live Studies Track, and Poster Track}.
+\newblock Pisa, Italy: [b.n.], 2020.
+
+\bibitem{Jiang2022}
+{\sc\bgroup}Jiang{\egroup}, A.~Q., {\sc\bgroup}Li{\egroup}, W., {\sc\bgroup}Tworkowski{\egroup}, S., {\sc\bgroup}Czechowski{\egroup}, K., {\sc\bgroup}Odrzyg\'{o}\'{z}d\'{z}{\egroup}, T. et~al.
+\newblock Thor: Wielding Hammers to Integrate Language Models and Automated Theorem Provers.
+\newblock In:~{\em Advances in Neural Information Processing Systems}.
+\newblock Curran Associates, Inc., 2022, p.~8360--8373.
+
+\bibitem{Req2SpecPaper}
+{\sc\bgroup}Nayak{\egroup}, A., {\sc\bgroup}Timmapathini{\egroup}, H.~P., {\sc\bgroup}Murali{\egroup}, V., {\sc\bgroup}Ponnalagu{\egroup}, K., {\sc\bgroup}Venkoparao{\egroup}, V.~G. et~al.
+\newblock Req2Spec: Transforming Software Requirements into Formal Specifications Using Natural Language Processing.
+\newblock In:~{\em Requirements Engineering: Foundation for Software Quality (REFSQ 2022)}.
+\newblock Berlin, Heidelberg: Springer-Verlag, 2022, p.~87--95.
+
+\bibitem{nowakowski2013requirements}
+{\sc\bgroup}Nowakowski{\egroup}, W., {\sc\bgroup}\'{S}mia\l{}ek{\egroup}, M., {\sc\bgroup}Ambroziewicz{\egroup}, A. and~{\sc\bgroup}Straszak{\egroup}, T.
+\newblock Requirements-Level Language and Tools for Capturing Software System Essence.
+\newblock {\em Computer Science and Information Systems}.
+\newblock 2013, vol.~10, no.~4, p.~1499--1524.
+
+\bibitem{quan2024verificationrefinementnaturallanguage}
+{\sc\bgroup}Quan{\egroup}, X., {\sc\bgroup}Valentino{\egroup}, M., {\sc\bgroup}Dennis{\egroup}, L.~A. and~{\sc\bgroup}Freitas{\egroup}, A.
+\newblock {\em Verification and Refinement of Natural Language Explanations through {LLM}-Symbolic Theorem Proving}.
+\newblock 2024.
+\newblock Available at: ~{\small\url{https://arxiv.org/abs/2405.01379}}.
+
+\bibitem{Yang2023}
+{\sc\bgroup}Yang{\egroup}, K., {\sc\bgroup}Swope{\egroup}, A., {\sc\bgroup}Gu{\egroup}, A., {\sc\bgroup}Chalamala{\egroup}, R., {\sc\bgroup}Song{\egroup}, P. et~al.
+\newblock {LeanDojo}: Theorem Proving with Retrieval-Augmented Language Models.
+\newblock In:~{\em Advances in Neural Information Processing Systems}.
+\newblock Curran Associates, Inc., 2023, p.~21573--21612.
 
 \end{thebibliography}
