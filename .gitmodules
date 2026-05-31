@@ -1,0 +1,3 @@
+[submodule "formalism"]
+	path = formalism
+	url = git@github.com:JakubBlaha/pp1.git
