@@ -102,7 +102,7 @@ While prior controlled-language frontends~\cite{giannakopoulou2020fret,nowakowsk
 
 The formalism satisfies the properties listed below. Each property is paired with a concrete use case expressed in abstract placeholders (signals $A$, $B$; events $e_A$, $e_B$; etc.) and a brief note on the construct the formalism provides to address it.
 
-\todo{Fix ordering}
+\todo{Add a brief introduction to the formalism (how one should think about it)}
 
 \todo{Inlcude a requirement and test case example, so the reader can have a better understanding before reading the rest}
 
@@ -116,7 +116,7 @@ The formalism satisfies the properties listed below. Each property is paired wit
 
 \paragraph{Time and values.}
 
-\textbf{Discrete and continuous time.} The formalism shall support both discrete-time and continuous-time requirements within a single vocabulary. \textit{Example:} A discrete-time requirement says ``at every step, $A$ is incremented by $3$''; a continuous-time requirement says ``$e_B$ must occur within $2$ seconds of $e_A$''. \textit{Solution:} The time set $T$ has two flavours: $T_D = \mathbb{N} \cup \{\infty\}$ for discrete time and $T_C = \mathbb{R}_{\geq 0} \cup \{\infty\}$ for continuous time. Each requirement carries a $\mathit{flavour} \in \{\text{Discrete},\, \text{Continuous}\}$ field that fixes $T$ for its scope.
+\textbf{Discrete and continuous time.} The formalism shall support both discrete-time and continuous-time requirements within a single vocabulary. \textit{Example:} A discrete-time requirement says ``at every step, $A$ is incremented by $3$''; a continuous-time requirement says ``$e_B$ must occur within $2$ seconds of $e_A$''. \textit{Solution:} The time set $T$ has a discrete flavour $T_D$ and a continuous flavour $T_C$; each requirement carries a $\mathit{flavour} \in \{\text{Discrete},\, \text{Continuous}\}$ field that fixes $T$ for its scope.
 
 \textbf{Entities of multiple kinds carry values, and operations modify them in test cases.} The formalism shall represent entities of different kinds (registers, states, communication channels, computed signals, etc.) and let each carry a value at any given time point. It shall also provide a way for test cases to describe how those values change over time. \textit{Example:} Register $A$, state $B$, and channel $C$ each have a value at every relevant time point; a test case may, for instance, write a new value into $A$, transition $B$ to a new state, or transmit a value through $C$. \textit{Solution:} The formalism defines an extensible catalogue of entity kinds (currently signal, storage, event, event-trigger, channel, state, value, abstract, and set), and a valuation maps each entity to its value at each time point of a trace. Modifications of those values are expressed through \emph{operations} --- an extensible catalogue of actions, currently including \emph{calculate}, \emph{write}, \emph{read}, \emph{fire}, \emph{set\_state}, \emph{transmit}, \emph{receive}, \emph{insert}, \emph{remove}, and \emph{clear} --- that a test case fires at specific time points to drive the trace. Each entity kind has its own subset of applicable operations (e.g.\ \emph{write} applies to storage, \emph{fire} to event-triggers, \emph{transmit} to channels).
 
