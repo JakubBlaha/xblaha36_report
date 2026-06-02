@@ -4,6 +4,8 @@
 %--------------------------------------------------------
 \section{Introduction}
 
+\todo{Add the pipeline image showing the overall flow (NL requirement and test cases $\rightarrow$ LLM $\rightarrow$ formalism $\rightarrow$ coverage checker).}
+
 With the rise of Large Language Models (LLMs) and the increase
 in their capabilities, companies are motivated to use LLMs for
 automation tasks, including testing and the tooling for it. However, LLMs
@@ -98,13 +100,105 @@ While prior controlled-language frontends~\cite{giannakopoulou2020fret,nowakowsk
 
 %--------------------------------------------------------
 %--------------------------------------------------------
+\subsection{Structure of the formalism}\label{subsec:structure}
+
+The formalism is organised into several layers, each building on the ones below it. The remainder of this section refers back to these layers when discussing individual requirements and design choices.
+
+\paragraph{Time entities, and traces.} The bottom layer fixes a time set $T$ (either discrete or continuous, for a given requirement) and a set of \emph{entities} representing the kinds of things present in the system: signals, storage (registers), communication channels, states, events, and so on. A \emph{trace} is a function that assigns to each time point a partial \emph{valuation} mapping entities to their current values.
+
+\paragraph{Expressions and point-in-time predicates.} Built on top of traces, \emph{expressions} compute values from a trace (for example ``the value of register $A$ at time $t$'' or ``the number of times $e_A$ has occurred up to $t$''), and \emph{predicates} are boolean-valued expressions (for example ``$A$ is greater than $5$''). Both kinds implicitly take the trace and an ambient time argument that is supplied by the surrounding context rather than passed explicitly.
+
+\paragraph{Operations.} Operations (\emph{write}, \emph{fire}, \emph{transmit}, \emph{set\_state}, \ldots) are the actions a test case fires to drive a trace. Each operation, applied to an entity at a specific time, produces an effect predicate describing what must hold in the trace as a result of the firing.
+
+\paragraph{Temporal constructs.} Temporal constructs (\emph{Always}, \emph{Eventually}, \emph{Initial}, \emph{Causes}, \emph{CausesWithin}, \emph{Sequence}, $\ldots$) lift point-in-time predicates into \emph{trace predicates}: a single boolean statement about the whole trace, obtained by quantifying over time. Trace predicates compose with one another via the usual logical operators ($\land$, $\lor$, $\lnot$, $\Rightarrow$, $\Leftrightarrow$) at the trace level, and together they form the building blocks of a requirement's constraint.
+
+\paragraph{Requirements and test cases.} A \emph{requirement} is a triple consisting of a time flavour, a set of participating entities, and a trace predicate (the constraint). A \emph{test case} is a triple consisting of an initial valuation, a finite set of stimuli (timed operation firings), and a set of point-in-time assertions to verify at specific times. Both sides reference the same entities and draw their predicates from the same space, which is what allows a checker to determine which sub-formulas of a requirement are exercised by the test cases.
+
+%--------------------------------------------------------
+%--------------------------------------------------------
 \subsection{Formalism requirements and its design}
 
 The formalism satisfies the properties listed below. Each property is paired with a concrete use case expressed in abstract placeholders (signals $A$, $B$; events $e_A$, $e_B$; etc.) and a brief note on the construct the formalism provides to address it.
 
-\todo{Add a brief introduction to the formalism (how one should think about it)}
+\paragraph{Running example.}
+To anchor the discussion, consider the following requirement -- Req 10 from the worked-example set in Appendix~\ref{app:formalism}.
 
-\todo{Inlcude a requirement and test case example, so the reader can have a better understanding before reading the rest}
+\medskip
+\textit{The software shall enter the emergency mode if any of the following failures individually occurs twice in less than 10 seconds: (a) sensor failure, (b) energy failure, (c) communication failure.}
+
+\medskip
+The requirement is formalised over the following entities:
+
+{\footnotesize
+\begin{center}
+    \begin{tabular}{@{}l l p{0.42\linewidth}@{}}
+        \toprule
+        \textbf{Entity}             & $t_e$        & $\mu_e$   \\
+        \midrule
+        $\mathit{sensor\_failure}$  & EventTrigger & ---       \\
+        $\mathit{ev\_sensor\_fail}$ & Event        &
+        $\{\mathit{target} \mapsto id_{\mathit{sensor\_failure}},$\newline
+        $\phantom{\{}\mathit{type} \mapsto \mathit{generic}\}$ \\
+        $\mathit{energy\_failure}$  & EventTrigger & ---       \\
+        $\mathit{ev\_energy\_fail}$ & Event        &
+        $\{\mathit{target} \mapsto id_{\mathit{energy\_failure}},$\newline
+        $\phantom{\{}\mathit{type} \mapsto \mathit{generic}\}$ \\
+        $\mathit{comm\_failure}$    & EventTrigger & ---       \\
+        $\mathit{ev\_comm\_fail}$   & Event        &
+        $\{\mathit{target} \mapsto id_{\mathit{comm\_failure}},$\newline
+        $\phantom{\{}\mathit{type} \mapsto \mathit{generic}\}$ \\
+        $\mathit{emergency\_mode}$  & State        & ---       \\
+        \bottomrule
+    \end{tabular}
+\end{center}
+}
+
+With time set to the continuous flavour (units: seconds), the constraint is:
+
+{\footnotesize
+\begin{align*}
+    \mathit{Causes}\Bigl(
+     & \;\Bigl(\mathit{Happening}(\mathit{ev\_sensor\_fail},\, \mathit{Now})         \\
+     & \qquad\land\; \mathit{EvtOccCount}_\rho\bigl(                                 \\
+     & \qquad\qquad \mathit{ev\_sensor\_fail},                                       \\
+     & \qquad\qquad \mathit{MkIntervalOO}(\mathit{Now} - 10,\, \mathit{Now})         \\
+     & \qquad\bigr) \geq 1\Bigr)                                                     \\
+    \lor\;
+     & \;\Bigl(\mathit{Happening}(\mathit{ev\_energy\_fail},\, \mathit{Now})         \\
+     & \qquad\land\; \mathit{EvtOccCount}_\rho\bigl(                                 \\
+     & \qquad\qquad \mathit{ev\_energy\_fail},                                       \\
+     & \qquad\qquad \mathit{MkIntervalOO}(\mathit{Now} - 10,\, \mathit{Now})         \\
+     & \qquad\bigr) \geq 1\Bigr)                                                     \\
+    \lor\;
+     & \;\Bigl(\mathit{Happening}(\mathit{ev\_comm\_fail},\, \mathit{Now})           \\
+     & \qquad\land\; \mathit{EvtOccCount}_\rho\bigl(                                 \\
+     & \qquad\qquad \mathit{ev\_comm\_fail},                                         \\
+     & \qquad\qquad \mathit{MkIntervalOO}(\mathit{Now} - 10,\, \mathit{Now})         \\
+     & \qquad\bigr) \geq 1\Bigr),                                                    \\
+     & \;\mathit{Val}_\rho(\mathit{emergency\_mode},\, \mathit{Now}) = \mathit{true}
+    \;\Bigr)
+\end{align*}
+}
+
+The constructs $\mathit{Causes}$, $\mathit{Happening}$, $\mathit{EvtOccCount}$, and $\mathit{MkIntervalOO}$ are defined in Appendix~\ref{app:formalism}; for the present discussion only the overall shape matters. Each disjunct in the antecedent says ``one of the failure types just fired now \emph{and} fired at least once within the last ten seconds'', and the consequent records that the system has entered the emergency mode.
+
+Letting $\psi_R$ denote the constraint above and $E_R$ the entity set listed in the table, the requirement is formally the triple
+    {\footnotesize
+        \[
+            R \;=\; (\mathrm{Continuous},\, E_R,\, \psi_R).
+        \]
+    }
+
+A matching test case fires two sensor failures within ten seconds and asserts that the emergency mode is active at the time of the second failure:
+{\footnotesize
+\begin{gather*}
+    \mathit{TC}_R = (\sigma_0,\, S,\, A), \quad \text{where} \\
+    \sigma_0 = \{\, \mathit{emergency\_mode} \mapsto \mathit{false} \,\}, \\
+    S = \{\, (1,\, \mathit{fire},\, \mathit{sensor\_failure}), \\
+    \phantom{S = \{\,} (5,\, \mathit{fire},\, \mathit{sensor\_failure}) \,\}, \\
+    A(5) = \{\, \mathit{Val}_\rho(\mathit{emergency\_mode},\, 5) = \mathit{true} \,\}.
+\end{gather*}
+}
 
 \paragraph{Meta-level properties.}
 
@@ -157,14 +251,6 @@ $\mathit{AllOf}\bigl(\{\mathit{Implies}(\mathit{Cmp}(A,\, =,\, \mathit{true}),\,
 
 \textbf{Sliding temporal windows.} The formalism shall reason about a window of fixed length ending at the current time. \textit{Example:} ``$e_A$ occurred at least twice in the last $10$ seconds.'' \textit{Solution:} An interval constructor applied to $\mathit{Now}$ (e.g.\ $\mathit{MkIntervalOO}(\mathit{Now} - d,\, \mathit{Now})$) produces the window, which can then be passed to $\mathit{EvtOccCount}_\rho$ to count event occurrences, to $\mathit{MaxVal}_\rho$/$\mathit{MinVal}_\rho$ to bound a signal's range, or to interval predicates such as $\mathit{IntervalIncludes}$/$\mathit{IntervalExcludes}$.
 
-\todo{Preferably without human in the loop}
-
-%--------------------------------------------------------
-%--------------------------------------------------------
-\subsection{Formalism design decisions}
-
-\todo{Might already be covered by previous section}
-
 %--------------------------------------------------------
 %--------------------------------------------------------
 \subsection{Formalism definition}
@@ -176,9 +262,39 @@ $\mathit{AllOf}\bigl(\{\mathit{Implies}(\mathit{Cmp}(A,\, =,\, \mathit{true}),\,
 %--------------------------------------------------------
 \subsection{Known limitations and possible future extensions}
 
-\todo{Although this work claims that the formalism should be close to english and is close in the sense that it uses english words, the words themselves might not appear in a similar order than they would in english. This might be a limitation.}
+\textbf{Word order versus English syntax.} The formalism deliberately uses English words for its constructs, expressions, and predicates -- $\mathit{Always}$, $\mathit{Causes}$, $\mathit{MaxVal}$, $\mathit{Happening}$, and so on -- to keep individual identifiers recognisable to a human reader. The overall syntactic structure, however, is prefix function application throughout: every temporal construct, operation, and predicate places its head before its arguments. A requirement that reads in English as ``after receiving a MastershipInfo of BACKUP, the system shall operate as Backup'' becomes a nested $\mathit{Causes}(\dots,\, \dots)$ expression whose outer construct binds the cause-effect relation, with the trigger condition as the first argument and the consequence as the second. The mapping from English to the formalism is therefore not a near-monotonic substitution of words but a structural reorganisation. Human readers must mentally re-order the formalism back to natural English to verify it, and an LLM-based translator has to perform an explicit syntactic transformation rather than a token-level rewrite -- which is harder to learn, harder to evaluate, and prone to silent re-ordering errors that change the meaning.
 
-\todo{Add limitations from formalism document}
+\textbf{Modifier parameterisation.} Modifier values are currently static -- fixed at entity-definition time to a single element of the modifier value set. Some entities, however, have intrinsic time-dependent behaviour that would naturally be expressed as a function rather than a single value. Consider a free-running cycle counter, modelled as a \texttt{Storage} entity, whose value at any time is the time elapsed since the last system reset. The present formalism has no way to express this intrinsic behaviour. A future extension that allowed modifier values themselves to be functions -- for example, a modifier whose value is the expression returning the elapsed time since the last reset -- would let such entities declare their intrinsic behaviour at definition time.
+
+\textbf{Partiality propagation.} Several functions in the formalism are explicitly partial; representative cases include $\mathit{Prev}$ -- undefined at $t = 0$; $\mathit{RelTime}$ -- undefined when the shifted time point would be negative; $\mathit{MkInterval}$ -- undefined when the start exceeds the end; $\mathit{ValBefore}_\rho$ -- undefined when no prior operation has fired; and $\mathit{Val}_\rho$ -- undefined when the entity has no value at the given time point. The formalism does not yet specify how partiality propagates when an undefined sub-expression appears inside a larger expression or predicate. The options are: a \emph{well-formedness condition} that forbids such expressions syntactically, requiring the user to guard them explicitly; a \emph{three-valued / Kleene logic} under which undefinedness propagates upward and yields a third truth value; or a \emph{definedness guard} under which any predicate containing an undefined sub-expression evaluates to $\mathit{false}$.
+
+\textbf{Open question -- Channel/transmit semantics.} The current model is asynchronous: the transmitted value persists on the channel until the next \textit{transmit}, so \textit{receive} at any $t' \geq t$ reads the last transmitted value, and \textit{transmit} and \textit{receive} are independent operations that may occur at different times. It is unclear whether this is the right model for all channel types, or whether some channels should require the receiver to observe the value at the exact transmission time. An alternative synchronous model would have \textit{transmit} directly cause \textit{received} to fire at the same time $t$, making \textit{receive} a consequence of \textit{transmit} rather than a separate operation.
+
+\textbf{Predicate snapshot comparison.} The formalism cannot currently express that the set of predicates holding at one time point must match the set of predicates holding at another. Consider a system with four hardware registers R1, R2, R3 and R4, together with a declared pool of predicates over them: for instance, R1 lies between 0 and 100, R2 is less than R3, and R3 is greater than 50. A requirement might state that after the system is reset and a short stabilisation period has elapsed, exactly the same predicates from this pool must hold as held immediately before the reset. The temporal constructs in this formalism can quantify over time and check individual predicates, but they cannot capture which predicates from a given pool hold at a time point and then compare those captured sets across two time points by equality, by subset, or by non-empty intersection. Supporting this would require a snapshot primitive that returns the subset of a declared predicate pool holding at a time point, together with set-level operators on the resulting snapshots.
+
+\textbf{Time-when expression.} The formalism provides $\mathit{LastOcc}_\rho$ and $\mathit{FirstOcc}_\rho$ for asking when a given event last or first occurred, but only for entities of type \texttt{Event} -- whose value at every time point is a boolean occurrence flag. A general-purpose $\mathit{LastTrue}_\rho(\psi, t)$ that returns the most recent $t' \leq t$ at which an arbitrary predicate $\psi$ holds, together with a symmetric $\mathit{FirstTrue}_\rho(\psi, t)$, would let requirements reference the time of conditions that are not themselves declared events. For instance, the time at which the compound predicate $\mathit{Val}_\rho(R_1, t) > 10 \,\land\, \mathit{Val}_\rho(R_2, t) < 50$ last held cannot be expressed concisely with the current operators: the conjunction is not a declared event, and no existing construct returns the time at which an arbitrary predicate was last true. Like the predicate snapshot comparison above, this extension requires treating predicates as first-class objects rather than as constraints quantified over by temporal constructs; lifting predicates in this way is not a trivial change to the underlying semantics, which is why both are deferred to future work rather than included in the present formalism.
+
+\textbf{Time element for continuous requirements.} A requirement could optionally declare a \emph{time element} $\varepsilon \in \mathbb{R}_{>0}$, representing the smallest meaningful time increment in that requirement (e.g. a sampling period or clock cycle). In the continuous-time flavour, $\mathit{Prev}$ and $\mathit{Next}$ are currently undefined because there is no canonical predecessor or successor of a real-valued time point. With a declared $\varepsilon$, they could be lifted to continuous time as $\mathit{Prev}(t) = t - \varepsilon$ and $\mathit{Next}(t) = t + \varepsilon$, making the full set of discrete-time expressions available to requirements that have a known sampling granularity.
+
+\textbf{Unified time model via time element.} The current formalism maintains two separate time flavours, $T_D = \mathbb{N}$ and $T_C = \mathbb{R}_{\geq 0}$, selected per requirement. These could be unified into a single model by making the time element $\varepsilon$ (see the time element extension) a mandatory requirement parameter. The unified time set would then be $T = \{0,\, \varepsilon,\, 2\varepsilon,\, 3\varepsilon,\, \ldots\}$, restricting time to multiples of $\varepsilon$ and making $\mathit{Prev}(t) = t - \varepsilon$ and $\mathit{Next}(t) = t + \varepsilon$ total (except at $t = 0$). Under this model, discrete time is simply the special case $\varepsilon = 1$, and a ``continuous'' requirement with a known sampling period $\varepsilon$ is expressed the same way. Crucially, this is a stronger commitment than merely defining $\mathit{Prev}$ and $\mathit{Next}$ on an otherwise uncountable $\mathbb{R}_{\geq 0}$: it makes the time domain itself countable, so that quantifiers such as $\forall t \in T$ range over a countable set.
+
+\textbf{Typed sets.} The current \texttt{Set} entity type stores an arbitrary finite subset of $V_{\mathrm{nonset}}$, with no constraint that all elements of a given set share a uniform type. A single \texttt{Set} entity could therefore mix booleans with real numbers or entity identifiers, even though such heterogeneous collections rarely correspond to anything a requirement intends. A future extension would let a \texttt{Set} entity declare an element type at definition time -- for example, a set of real-valued sensor readings, a set of entity identifiers for the currently active failure conditions, or a set of boolean flags. The declared type would propagate to the operations: $\mathit{insert}(t, e, v)$ and $\mathit{remove}(t, e, v)$ would require $v$ to match the declared type, and aggregation expressions such as $\mathit{MaxVal}$ over a set of reals would gain well-defined semantics. This removes a class of silent type mismatches that the coverage checker cannot otherwise detect, and brings the \texttt{Set} entity into line with the typed-payload story under \emph{Event payload} below.
+
+\textbf{Event payload.} Currently an event entity carries only a boolean occurrence flag indicating whether the event has fired at a given time point. Any data associated with the event must therefore be expressed as a separate value check on the target entity. For instance, stating that a transmission carried the value TRUE on a particular communication channel requires two distinct assertions: one that the transmit event fired, and another that the channel held the value TRUE at that moment. This splits what logically belongs together into two clauses and risks the value constraint being omitted from the requirement specification, silently leaving the payload unrestricted. A future extension should allow events to carry a typed payload, so that asking whether an event fired and what value it carried can be expressed as a single check.
+
+\textbf{Required modifier keys.} The current modifier system specifies which modifier keys are \emph{permitted} for each entity type, but all modifiers are optional. A future extension could introduce a companion specification of which modifier keys are \emph{required} for a given entity type. For example, predefined-event \texttt{Event} entities should always carry both a target reference and an event-type label.
+
+\textbf{Aggregate expression recognition.} When a test case computes a result through a sequence of arithmetic operations (e.g.\ summing values and dividing by a count), the coverage checker must be able to recognise that the computation is equivalent to an aggregate such as average or median. Without this, a test exercising $\mathit{avg}(e, i)$ expressed via raw arithmetic would not be matched against a requirement that references the same aggregate by name. A future extension should define canonical aggregate expressions ($\mathit{Avg}$, $\mathit{Median}$, etc.) and a normalisation or equivalence procedure that maps common arithmetic patterns to them.
+
+\textbf{Triggered sequence construct.} $\mathit{Sequence}$ is existential: it requires at least one complete chain of ordered events to occur somewhere in the trace. The universal reading --- every occurrence of a triggering event must be followed by the full sequence --- cannot be expressed with the current constructs. A $\mathit{TriggeredSequence}(\psi_{\mathit{trigger}},\, \psi_1,\, \ldots,\, \psi_n)$ construct would be needed, expanding to $\forall t \in T:\; \psi_{\mathit{trigger}}(\rho, t) \Rightarrow \exists t \leq t_1 \leq \cdots \leq t_n:\; \psi_i(\rho, t_i)$ for all $i$.
+
+\textbf{Dynamic entity lifetimes.} The entity set $E$ is fixed for the scope of a requirement, so the formalism cannot distinguish between an entity that does not exist at time $t$ and one that merely has no value there -- both reduce to $\sigma(e)$ being undefined. This limits the expression of requirements that involve entities with dynamic lifetimes, such as a spawned process or an opened connection.
+
+\textbf{Enum types.} The base values set $V_{\text{base}}$ currently contains only booleans, reals, time points, and intervals. Requirements that involve enumerated types (e.g.\ \textsc{backup}/\textsc{master} mastership modes, error codes, operating states) must represent enum values as untyped symbolic constants with no formal declaration or exhaustiveness guarantee. A future extension should introduce a named enum mechanism: a way to declare a finite set of symbolic constants (e.g.\ $\mathit{Mastership} = \{\mathit{BACKUP},\, \mathit{MASTER}\}$) and extend $V_{\text{base}}$ with their values, so that constraints can reference them by name and the coverage checker can enumerate their cases.
+
+\textbf{User-defined modifier keys.} Currently, the set of permitted modifier keys for each entity type is fixed by $M_E$ and can only be extended at the formalism level. A future extension could allow users to attach arbitrary key-value annotations to entities inline when writing a requirement -- for example, to record a physical unit, an address, or a domain-specific tag -- without requiring a change to $M_E$. The \texttt{Abstract} entity type already serves as a catch-all for entities that do not fit a predefined kind; user-defined modifiers would naturally complement it.
+
+\textbf{Global axioms.} The formalism should define a set of predicates (axioms) that hold in every well-formed trace, ruling out physically impossible states. For example, two write events cannot be happening on the same register at the same time. Such axioms would constrain $\rho$ and let the coverage checker reject inconsistent test cases.
 
 %--------------------------------------------------------
 %--------------------------------------------------------
