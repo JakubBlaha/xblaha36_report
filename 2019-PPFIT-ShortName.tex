@@ -2,6 +2,8 @@
 % \documentclass[czech]{PPFIT} % pro psaní v češtině / for writing in Czech
 %\documentclass[slovak]{PPFIT} % pro psaní ve slovenštině / for writing in Slovak
 
+\usepackage{pdfpages} % for appending the standalone formalism PDF as Appendix A
+
 %--------------------------------------------------------
 %--------------------------------------------------------
 %	PŘIZPŮSOBENÍ PDF / PDF CUSTOMIZATION
@@ -66,9 +68,9 @@
     %--------------------------------------------------------
     %	INFORMATION ABOUT THE ARTICLE
     %--------------------------------------------------------
-    \PaperTitle{How to write an amazing article}
+    \PaperTitle{Evaluating Test Completeness Against Software Requirements}
 
-	\Authors{Adam Herout*}
+	\Authors{Bc. Jakub Bláha}
 	\affiliation{*%
 		\href{mailto:herout@fit.vut.cz}{herout@fit.vut.cz},
 		\textit{Faculty of Information Technology, Brno University of Technology}}
@@ -124,18 +126,6 @@
 
 %--------------------------------------------------------
 %--------------------------------------------------------
-%	PŘÍLOHY / APPENDICES
-%--------------------------------------------------------
-%--------------------------------------------------------
-\appendix
-\ifczechslovak
-    \input{2019-PPFIT-ShortName-appendix.tex}
-\else
-    \input{2019-PPFIT-ShortName-appendix-en.tex}
-\fi
-
-%--------------------------------------------------------
-%--------------------------------------------------------
 %--------------------------------------------------------
 %	LITERATURA
 %--------------------------------------------------------
@@ -152,6 +142,17 @@
 \fi
 
 \bibliography{2019-PPFIT-ShortName-bib}
+
+%--------------------------------------------------------
+%--------------------------------------------------------
+%	PŘÍLOHY / APPENDICES (appended after the bibliography)
+%--------------------------------------------------------
+%--------------------------------------------------------
+\appendix
+\refstepcounter{section}\label{app:formalism}
+\addcontentsline{toc}{section}{\thesection\quad Formalism definition}
+\nolinenumbers
+\includepdf[pages=-,pagecommand={}]{formalism/tex-new/doc}
 
 %--------------------------------------------------------
 %--------------------------------------------------------

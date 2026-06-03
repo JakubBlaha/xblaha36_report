@@ -88,7 +88,11 @@ Fazelnia et al.\ (2024)~\cite{10.1145/3691620.3695302} build \emph{SAT-LLM}, whi
     \end{tabular}
 \end{table}
 
-\todo{Add the gap and what is our contribution, basically summarize the next section}
+The systems surveyed above translate natural-language requirements into a single, fixed target formalism -- LTL for nl2spec, SystemVerilog Assertions for AssertLLM, HANFOR patterns for Req2Spec, prover-specific languages for Thor, LeanDojo and Explanation-Refiner -- and each commits up front to one back-end logic. Retargeting the same requirement to a different verifier therefore means rewriting it.
+
+The formalism presented in the next section sits as an intermediate layer between natural language and the back-end verifiers: close enough to English that a human or an LLM can read and produce it, but precisely defined mathematically so that every construct has unambiguous semantics. It is logic-agnostic, so the same requirement can be projected to several back-end verifiers without rewriting it. It is also positioned as a shared representation for requirements and the matching test cases -- the same predicates appear on both sides, which is what makes coverage-gap detection mechanical. The construct names (\emph{Causes}, \emph{Happening}, \emph{MaxVal}, \emph{EvtOccCount}, $\ldots$) are drawn from the vocabulary humans already use when describing requirements informally, and every name is tied directly to a precise mathematical definition. A close precedent is nl2spec's interactive subformula refinement, which similarly attaches English fragments to formal atoms; but nl2spec's mapping is user-defined per requirement -- the engineer labels their own subformulas during each translation -- whereas here the vocabulary is a fixed, shared catalogue that the LLM and the reader can rely on across every requirement.
+
+\todo{Image representing intermediate layer}
 
 %--------------------------------------------------------
 %--------------------------------------------------------
@@ -255,8 +259,7 @@ $\mathit{AllOf}\bigl(\{\mathit{Implies}(\mathit{Cmp}(A,\, =,\, \mathit{true}),\,
 %--------------------------------------------------------
 \subsection{Formalism definition}
 
-\todo{Add an appendix}
-\todo{Add appendix with examples}
+The complete formalism -- primitives, entity types, expressions, predicates, operations, temporal constructs, and the definition of a requirement and a test case -- is given in Appendix~\ref{app:formalism}. The remainder of this section refers to those definitions but does not reproduce them.
 
 %--------------------------------------------------------
 %--------------------------------------------------------
@@ -280,7 +283,11 @@ $\mathit{AllOf}\bigl(\{\mathit{Implies}(\mathit{Cmp}(A,\, =,\, \mathit{true}),\,
 
 \textbf{Typed sets.} The current \texttt{Set} entity type stores an arbitrary finite subset of $V_{\mathrm{nonset}}$, with no constraint that all elements of a given set share a uniform type. A single \texttt{Set} entity could therefore mix booleans with real numbers or entity identifiers, even though such heterogeneous collections rarely correspond to anything a requirement intends. A future extension would let a \texttt{Set} entity declare an element type at definition time -- for example, a set of real-valued sensor readings, a set of entity identifiers for the currently active failure conditions, or a set of boolean flags. The declared type would propagate to the operations: $\mathit{insert}(t, e, v)$ and $\mathit{remove}(t, e, v)$ would require $v$ to match the declared type, and aggregation expressions such as $\mathit{MaxVal}$ over a set of reals would gain well-defined semantics. This removes a class of silent type mismatches that the coverage checker cannot otherwise detect, and brings the \texttt{Set} entity into line with the typed-payload story under \emph{Event payload} below.
 
+\textbf{Flat sets.} Set values in the formalism are flat: a \texttt{Set} entity cannot contain another set. This was chosen for simplicity; supporting sets that may themselves contain sets should be considered in a future revision.
+
 \textbf{Event payload.} Currently an event entity carries only a boolean occurrence flag indicating whether the event has fired at a given time point. Any data associated with the event must therefore be expressed as a separate value check on the target entity. For instance, stating that a transmission carried the value TRUE on a particular communication channel requires two distinct assertions: one that the transmit event fired, and another that the channel held the value TRUE at that moment. This splits what logically belongs together into two clauses and risks the value constraint being omitted from the requirement specification, silently leaving the payload unrestricted. A future extension should allow events to carry a typed payload, so that asking whether an event fired and what value it carried can be expressed as a single check.
+
+\textbf{Request/response correlation.} The formalism has no first-class way to express that a particular response is the answer to a particular request. A request/response pair can be approximated by combining a send event with a later receive event and tracking the in-flight requests in a \texttt{Set} entity, but matching a specific response back to the request it answers requires the request identifier to ride inside the event itself -- which runs into the \emph{Event payload} limitation above. Supporting request/response as a first-class pattern would let such requirements be expressed as a single relation rather than as a pair of separate predicates.
 
 \textbf{Required modifier keys.} The current modifier system specifies which modifier keys are \emph{permitted} for each entity type, but all modifiers are optional. A future extension could introduce a companion specification of which modifier keys are \emph{required} for a given entity type. For example, predefined-event \texttt{Event} entities should always carry both a target reference and an event-type label.
 
