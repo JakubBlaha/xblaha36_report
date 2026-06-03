@@ -4,7 +4,12 @@
 %--------------------------------------------------------
 \section{Introduction}
 
-\todo{Add the pipeline image showing the overall flow (NL requirement and test cases $\rightarrow$ LLM $\rightarrow$ formalism $\rightarrow$ coverage checker).}
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\textwidth]{images/pipeline.drawio}
+    \caption{Preliminary design of the verification pipeline. The components highlighted in red are the contribution of this work: the \emph{Formalism specification} that defines the target formal language, the intermediate and candidate representations $\Psi$ (a requirement or test case expressed using the formalism), and the \emph{Formalized Requests / Formalized Test Cases} that result from the translation. The focus of this work is therefore on defining the formalism itself and its formal properties, not on the LLM-based translation pipeline.}
+    \label{fig:pipeline}
+\end{figure*}
 
 With the rise of Large Language Models (LLMs) and the increase
 in their capabilities, companies are motivated to use LLMs for
@@ -64,26 +69,26 @@ Fazelnia et al.\ (2024)~\cite{10.1145/3691620.3695302} build \emph{SAT-LLM}, whi
     \centering
     \caption{State-of-the-art systems for natural-language to formal-specification translation discussed in this section, in chronological order within each category. Abbreviations: HITL = human-in-the-loop; NLP = natural language processing; MDD = model-driven development; SAL = Symbolic Analysis Laboratory; LTL = linear-time temporal logic; HANFOR = an industrial requirements-analysis tool that consumes pattern-based formal specifications; SVA = SystemVerilog Assertions; HOL = higher-order logic (as in the Isabelle/HOL theorem prover); SMT = satisfiability modulo theories.}
     \label{tab:sota}
-    \footnotesize
+    \tiny
     \begin{tabular}{@{}c l c p{0.27\linewidth} p{0.18\linewidth} c@{}}
         \toprule
-        Ref.                                                         & System              & Year & Models                                             & Target       & HITL \\
+        Ref.                                                         & System              & Year & Models                                                                  & Target       & HITL \\
         \midrule
-        \multicolumn{6}{@{}l}{\textit{Controlled-language frontends}}                                                                                                        \\
-        \cite{nowakowski2013requirements}                            & RSL/ReDSeeDS        & 2013 & --- (rule-based)                                   & Code (MDD)   & Yes  \\
-        \cite{Ghosh2016}                                             & ARSENAL             & 2016 & NLP pipeline                                       & SAL/LTL      & No   \\
-        \cite{giannakopoulou2020fret}                                & FRET                & 2020 & --- (rule-based)                                   & LTL          & Yes  \\
+        \multicolumn{6}{@{}l}{\textit{Controlled-language frontends}}                                                                                                                             \\
+        \cite{nowakowski2013requirements}                            & RSL/ReDSeeDS        & 2013 & --- (rule-based)                                                        & Code (MDD)   & Yes  \\
+        \cite{Ghosh2016}                                             & ARSENAL             & 2016 & NLP pipeline                                                            & SAL/LTL      & No   \\
+        \cite{giannakopoulou2020fret}                                & FRET                & 2020 & --- (rule-based)                                                        & LTL          & Yes  \\
         \midrule
-        \multicolumn{6}{@{}l}{\textit{LLM-only pipelines}}                                                                                                                   \\
-        \cite{Req2SpecPaper}                                         & Req2Spec            & 2022 & NLP pipeline                                       & HANFOR       & No   \\
-        \cite{cosler2023nl2specinteractivelytranslatingunstructured} & nl2spec             & 2023 & Codex, Bloom-176B                                  & LTL          & Yes  \\
-        \cite{10691792}                                              & AssertLLM           & 2024 & GPT-4o                                             & SVA          & No   \\
+        \multicolumn{6}{@{}l}{\textit{LLM-only pipelines}}                                                                                                                                        \\
+        \cite{Req2SpecPaper}                                         & Req2Spec            & 2022 & NLP pipeline                                                            & HANFOR       & No   \\
+        \cite{cosler2023nl2specinteractivelytranslatingunstructured} & nl2spec             & 2023 & Codex\newline Bloom-176B                                                & LTL          & Yes  \\
+        \cite{10691792}                                              & AssertLLM           & 2024 & GPT-4o                                                                  & SVA          & No   \\
         \midrule
-        \multicolumn{6}{@{}l}{\textit{Hybrid LLM + prover systems}}                                                                                                          \\
-        \cite{Jiang2022}                                             & Thor                & 2022 & 700M transformer                                   & Isabelle/HOL & No   \\
-        \cite{Yang2023}                                              & LeanDojo            & 2023 & ByT5 + retrieval                                   & Lean         & No   \\
-        \cite{quan2024verificationrefinementnaturallanguage}         & Explanation-Refiner & 2024 & GPT-4/3.5, Llama2-70b, Mixtral-8x7b, Mistral-small & Isabelle/HOL & No   \\
-        \cite{10.1145/3691620.3695302}                               & SAT-LLM             & 2024 & LLM + SMT solver                                   & SMT          & No   \\
+        \multicolumn{6}{@{}l}{\textit{Hybrid LLM + prover systems}}                                                                                                                               \\
+        \cite{Jiang2022}                                             & Thor                & 2022 & 700M transformer                                                        & Isabelle/HOL & No   \\
+        \cite{Yang2023}                                              & LeanDojo            & 2023 & ByT5 + retrieval                                                        & Lean         & No   \\
+        \cite{quan2024verificationrefinementnaturallanguage}         & Explanation-Refiner & 2024 & GPT-4/3.5\newline Llama2-70b\newline Mixtral-8x7b\newline Mistral-small & Isabelle/HOL & No   \\
+        \cite{10.1145/3691620.3695302}                               & SAT-LLM             & 2024 & LLM + SMT solver                                                        & SMT          & No   \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -92,7 +97,12 @@ The systems surveyed above translate natural-language requirements into a single
 
 The formalism presented in the next section sits as an intermediate layer between natural language and the back-end verifiers: close enough to English that a human or an LLM can read and produce it, but precisely defined mathematically so that every construct has unambiguous semantics. It is logic-agnostic, so the same requirement can be projected to several back-end verifiers without rewriting it. It is also positioned as a shared representation for requirements and the matching test cases -- the same predicates appear on both sides, which is what makes coverage-gap detection mechanical. The construct names (\emph{Causes}, \emph{Happening}, \emph{MaxVal}, \emph{EvtOccCount}, $\ldots$) are drawn from the vocabulary humans already use when describing requirements informally, and every name is tied directly to a precise mathematical definition. A close precedent is nl2spec's interactive subformula refinement, which similarly attaches English fragments to formal atoms; but nl2spec's mapping is user-defined per requirement -- the engineer labels their own subformulas during each translation -- whereas here the vocabulary is a fixed, shared catalogue that the LLM and the reader can rely on across every requirement.
 
-\todo{Image representing intermediate layer}
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{images/intermediate}
+    \caption{Direct translation (left) targets a single back-end formalism in one step. The proposed layered translation (right) inserts a close-to-NL formalism between the LLM and the back-end, so the same intermediate representation can be projected to several different verifier languages by a deterministic back-end translator.}
+    \label{fig:intermediate}
+\end{figure}
 
 %--------------------------------------------------------
 %--------------------------------------------------------
@@ -263,7 +273,7 @@ The complete formalism -- primitives, entity types, expressions, predicates, ope
 
 %--------------------------------------------------------
 %--------------------------------------------------------
-\subsection{Known limitations and possible future extensions}
+\subsection{Known limitations and possible future extensions}\label{subsec:limitations}
 
 \textbf{Word order versus English syntax.} The formalism deliberately uses English words for its constructs, expressions, and predicates -- $\mathit{Always}$, $\mathit{Causes}$, $\mathit{MaxVal}$, $\mathit{Happening}$, and so on -- to keep individual identifiers recognisable to a human reader. The overall syntactic structure, however, is prefix function application throughout: every temporal construct, operation, and predicate places its head before its arguments. A requirement that reads in English as ``after receiving a MastershipInfo of BACKUP, the system shall operate as Backup'' becomes a nested $\mathit{Causes}(\dots,\, \dots)$ expression whose outer construct binds the cause-effect relation, with the trigger condition as the first argument and the consequence as the second. The mapping from English to the formalism is therefore not a near-monotonic substitution of words but a structural reorganisation. Human readers must mentally re-order the formalism back to natural English to verify it, and an LLM-based translator has to perform an explicit syntactic transformation rather than a token-level rewrite -- which is harder to learn, harder to evaluate, and prone to silent re-ordering errors that change the meaning.
 
@@ -307,23 +317,52 @@ The complete formalism -- primitives, entity types, expressions, predicates, ope
 %--------------------------------------------------------
 \subsection{Compatibility with well-known formal specification methods}
 
-%--------------------------------------------------------
-%--------------------------------------------------------
-%--------------------------------------------------------
-%--------------------------------------------------------
-\subsection{Requirement and test case examples}
+Because the formalism is logic-agnostic, a requirement expressed in it is not tied to any single verification back-end. This subsection sketches how the temporal constructs correspond to established specification methods, so that a formalised requirement can be projected onto whichever back-end a downstream tool requires. The correspondences below are informal: they indicate the target operator each construct maps to, not a fully proven translation.
 
-%--------------------------------------------------------
-%--------------------------------------------------------
-%--------------------------------------------------------
-%--------------------------------------------------------
-\subsection{Future work}
+\paragraph{Linear Temporal Logic (LTL).}
+The untimed constructs correspond directly to the standard LTL operators. A point-in-time predicate $\psi$ plays the role of an LTL atomic proposition, and the temporal construct around it fixes the modality, as summarised in Table~\ref{tab:ltl}. Several of these are the classic specification patterns -- $\mathit{Causes}$ is the response pattern, $\mathit{Precedes}$ the precedence pattern, and $\mathit{Sequence}$ a chain of eventualities -- which is what makes the mapping to LTL natural.
+
+\begin{table}[h]
+    \centering
+    \caption{Correspondence between the untimed temporal constructs and LTL. $G$, $F$, $X$, and $W$ denote globally, eventually, next, and weak-until.}
+    \label{tab:ltl}
+    \footnotesize
+    \begin{tabular}{@{}l l@{}}
+        \toprule
+        Construct                                   & LTL equivalent                           \\
+        \midrule
+        $\mathit{Always}(\psi)$                     & $G\,\psi$                                \\
+        $\mathit{Eventually}(\psi)$                 & $F\,\psi$                                \\
+        $\mathit{Initial}(\psi)$                    & $\psi$ (initial state)                   \\
+        $\mathit{Immediately}(\psi_1, \psi_2)$      & $G(\psi_1 \rightarrow X\,\psi_2)$        \\
+        $\mathit{Causes}(\psi_1, \psi_2)$           & $G(\psi_1 \rightarrow F\,\psi_2)$        \\
+        $\mathit{Excludes}(\psi_1, \psi_2)$         & $G\,\lnot(\psi_1 \land \psi_2)$          \\
+        $\mathit{Precedes}(\psi_1, \psi_2)$         & $\lnot \psi_2 \; W \; \psi_1$            \\
+        $\mathit{Sequence}(\psi_1, \ldots, \psi_n)$ & $F(\psi_1 \land F(\psi_2 \land \cdots))$ \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\paragraph{Metric and signal extensions (MTL, STL).}
+Plain LTL captures ordering but not real-time bounds or arithmetic over values, both of which the formalism supports. Two well-known extensions of LTL close the gap. \emph{Metric Temporal Logic} (MTL) adds time-bounded operators, which is what $\mathit{CausesWithin}(\psi_1, \psi_2, d)$ requires: it maps to $G(\psi_1 \rightarrow F_{[0,d]}\,\psi_2)$. \emph{Signal Temporal Logic} (STL) additionally interprets atomic predicates as arithmetic comparisons over real-valued signals.
+
+\paragraph{Timed automata.}
+The same requirements also admit an operational reading as timed automata. A discrete-time requirement without timing bounds is a finite automaton over the entity valuations; the timed constructs introduce clocks: $\mathit{CausesWithin}$ resets a clock when its condition holds and guards the effect by the bound $d$, and a sliding window is a clock measuring elapsed time since the window opened. This is the construction that timing-aware back-ends and model checkers consume.
+
+\paragraph{Limits of the correspondence.}
+Not every construct maps onto these methods without cost. The set quantifiers $\mathit{ForAll}$ and $\mathit{Exists}$, together with $\mathit{Filter}$ and $\mathit{Size}$, range over a finite set of entities and are therefore first-order; they exceed propositional LTL and must be unrolled over the (finite) entity set before an LTL or automaton encoding applies. $\mathit{Sequence}$ and $\mathit{Precedes}$ are expressible in LTL but expand into nested operators whose size grows with the number of stages. And $\mathit{Causes}$, with its unbounded eventuality, has no finite-clock timed-automaton equivalent: a liveness (acceptance) condition is required rather than a safety construction. These cases remain expressible, but the translation is no longer a one-to-one substitution.
 
 \section{Conclusions}
 %--------------------------------------------------------
 %--------------------------------------------------------
 %--------------------------------------------------------
 %--------------------------------------------------------
+
+This work presented a formal base for expressing software requirements and their test cases, designed to sit as an intermediate layer between natural language and the back-end logics used by verification tools. Unlike the surveyed approaches, which translate natural language directly into a single fixed target logic, the formalism is logic-agnostic and is shared between requirements and test cases, so that the same predicates appear on both sides -- the property that makes mechanical detection of coverage gaps possible. Its constructs are named after the vocabulary used when describing requirements informally and are each tied to a precise mathematical definition, which keeps the representation readable to a human or an LLM while remaining unambiguous.
+
+The formalism was defined in layers -- primitives, entities, expressions and predicates, operations, temporal constructs, and finally requirements and test cases -- and its design was justified against a set of properties drawn from real requirement examples. Its compatibility with well-known specification methods was sketched: the untimed temporal constructs correspond to LTL operators, the time-bounded and value-based constructs to its metric and signal extensions, and the same requirements admit an operational reading as timed automata. Known limitations and possible extensions were discussed openly, indicating where the present design trades expressiveness for simplicity and which directions a future revision should pursue.
+
+Several avenues remain open. The most immediate is an empirical evaluation of how reliably an LLM translates natural-language requirements into the formalism, and of the coverage checker that consumes the result -- both of which the present work defines the target for but does not yet measure. The limitations identified in Section~\ref{subsec:limitations} -- among them parameterised modifiers, first-class predicates, typed and nested sets, and a request/response model -- form a concrete agenda for extending the formalism as further requirement classes are encountered.
 
 \section*{Acknowledgements}
 I would like to thank my supervisor Ing. Aleš Smrčka Ph.D. for his help.

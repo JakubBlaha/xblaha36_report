@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Intermediate-layer diagram</title>
+        <style>
+            :root {
+                --color-nl: #fef3c7;
+                --color-llm: #e0e7ff;
+                --color-formalism: #fed7aa;
+                --color-backend: #d1fae5;
+                --color-border: #1f2937;
+                --color-frame: #6b7280;
+                --color-text: #111827;
+            }
+
+            body {
+                margin: 0;
+                padding: 24px;
+                font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                color: var(--color-text);
+                background: #ffffff;
+                font-weight: 600;
+            }
+
+            /*
+             * Two panes side by side; each pane shows a vertical pipeline,
+             * top-aligned so the first (Natural-language requirement) box of
+             * both pipelines starts at the same vertical position.
+             */
+            .diagram {
+                display: flex;
+                flex-direction: row;
+                gap: 24px;
+                align-items: stretch;
+                padding-top: 20px;
+            }
+
+            .pane {
+                position: relative;
+                flex: 1 1 0;
+                border: 1.5px dashed var(--color-frame);
+                border-radius: 6px;
+                padding: 32px 14px 18px;
+                background: #fafafa;
+            }
+
+            .pane-label {
+                position: absolute;
+                top: -35px;
+                left: 18px;
+                padding: 0 8px;
+                background: #ffffff;
+                font-size: 24px;
+                font-weight: 500;
+                color: var(--color-frame);
+            }
+
+            /* Vertical pipeline: boxes stacked, downward arrows between them. */
+            .pipeline {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                height: 100%;
+            }
+
+            .box {
+                width: 80%;
+                padding: 12.6px 10px;
+                border: 1.2px solid var(--color-border);
+                border-radius: 12px;
+                text-align: center;
+                font-size: 26px;
+                line-height: 1.3;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+            }
+
+            .box.nl {
+                background: var(--color-nl);
+            }
+            .box.llm {
+                background: var(--color-llm);
+            }
+            .box.formalism {
+                background: var(--color-formalism);
+            }
+            .box.backend {
+                background: var(--color-backend);
+            }
+
+            .arrow {
+                font-size: 20px;
+                color: var(--color-border);
+                line-height: 1;
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="diagram">
+            <!-- Left: direct translation (nl2spec) -->
+            <div class="pane">
+                <span class="pane-label">Direct translation<br />(for example nl2spec)</span>
+                <div class="pipeline">
+                    <div class="box nl">Natural-language<br />requirement</div>
+                    <span class="arrow">&darr;</span>
+                    <div class="box llm">LLM</div>
+                    <span class="arrow">&darr;</span>
+                    <div class="box backend">Target formalism<br />(LTL)</div>
+                </div>
+            </div>
+
+            <!-- Right: layered translation (this work) -->
+            <div class="pane">
+                <span class="pane-label">Layered translation<br />(this work)</span>
+                <div class="pipeline">
+                    <div class="box nl">Natural-language<br />requirement</div>
+                    <span class="arrow">&darr;</span>
+                    <div class="box llm">LLM</div>
+                    <span class="arrow">&darr;</span>
+                    <div class="box formalism">Close-to-NL<br />formalism</div>
+                    <span class="arrow">&darr;</span>
+                    <div class="box llm">Back-end<br />translator</div>
+                    <span class="arrow">&darr;</span>
+                    <div class="box backend">Back-end formalism<br />(LTL / SMT / prover)</div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
