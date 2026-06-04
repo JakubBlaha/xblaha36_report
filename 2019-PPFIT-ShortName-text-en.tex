@@ -273,6 +273,126 @@ The complete formalism -- primitives, entity types, expressions, predicates, ope
 
 %--------------------------------------------------------
 %--------------------------------------------------------
+\subsection{Worked examples}\label{subsec:worked_examples}
+
+The following three requirements were constructed specifically to exercise the formalism. Each is given as a natural-language statement followed by its formalised constraint; the participating entities are listed first. For brevity, the requirement tuple and the matching test cases are omitted -- only the trace-predicate constraint is shown. For the definitions of the constructs, expressions, and predicates used below, the reader should refer to the appendix.
+
+\paragraph{Conditional counter increment.}
+\textit{After the system enters emergency mode, at each discrete time step the counter \textit{cnt} is incremented by 3.}
+
+{\footnotesize
+    \begin{center}
+        \begin{tabular}{@{}l l p{0.40\linewidth}@{}}
+            \toprule
+            \textbf{Entity}                 & $t_e$        & $\mu_e$ \\
+            \midrule
+            $\mathit{enter\_emergency}$     & EventTrigger & ---     \\
+            $\mathit{ev\_enter\_emergency}$ & Event        &
+            $\{\mathit{target} \mapsto id_{\mathit{enter\_emergency}},$\newline
+            $\phantom{\{}\mathit{type} \mapsto \mathit{generic}\}$   \\
+            $\mathit{cnt}$                  & Signal       & ---     \\
+            \bottomrule
+        \end{tabular}
+    \end{center}
+}
+
+With time set to the discrete flavour, the constraint is:
+{\footnotesize
+\begin{align*}
+    \mathit{Always}\Bigl(\;
+     & \mathit{HasHappened}_\rho(\mathit{ev\_enter\_emergency},\, \mathit{Now}) \;\Rightarrow{} \\
+     & \quad \mathit{Val}_\rho(\mathit{cnt},\, \mathit{Now}) =
+    \mathit{Val}_\rho(\mathit{cnt},\, \mathit{Prev}(\mathit{Now})) + 3
+    \;\Bigr)
+\end{align*}
+}
+
+\paragraph{Sum-triggered mode entry.}
+\textit{When the system reads the registers $A$ and $B$ and their sum is greater than 200, the system enters the emergency mode state within 200\,ns.}
+
+{\footnotesize
+    \begin{center}
+        \begin{tabular}{@{}l l p{0.40\linewidth}@{}}
+            \toprule
+            \textbf{Entity}                   & $t_e$   & $\mu_e$                              \\
+            \midrule
+            $A$                               & Storage & $\{\mathit{register} \mapsto \top\}$ \\
+            $B$                               & Storage & $\{\mathit{register} \mapsto \top\}$ \\
+            $\mathit{ev\_read\_A}$            & Event   &
+            $\{\mathit{target} \mapsto id_A,\ \mathit{type} \mapsto \mathit{read}\}$           \\
+            $\mathit{ev\_read\_B}$            & Event   &
+            $\{\mathit{target} \mapsto id_B,\ \mathit{type} \mapsto \mathit{read}\}$           \\
+            $\mathit{emergency\_mode}$        & State   & ---                                  \\
+            $\mathit{ev\_entered\_emergency}$ & Event   &
+            $\{\mathit{target} \mapsto id_{\mathit{emergency\_mode}},$\newline
+            $\phantom{\{}\mathit{type} \mapsto \mathit{entered}\}$                             \\
+            \bottomrule
+        \end{tabular}
+    \end{center}
+}
+
+With time set to the continuous flavour (units: nanoseconds), the constraint is:
+{\footnotesize
+\begin{align*}
+     & \mathit{CausesWithin}\Bigl(                                                                      \\
+     & \quad \mathit{Happening}(\mathit{ev\_read\_A},\, \mathit{Now}) \;\land\;
+    \mathit{Happening}(\mathit{ev\_read\_B},\, \mathit{Now})                                            \\
+     & \quad \land\; \mathit{Val}_\rho(A,\, \mathit{Now}) + \mathit{Val}_\rho(B,\, \mathit{Now}) > 200, \\
+     & \quad \mathit{Happening}(\mathit{ev\_entered\_emergency},\, \mathit{Now}),                       \\
+     & \quad 200
+    \;\Bigr)
+\end{align*}
+}
+
+\paragraph{Bounded count of large register values.}
+\textit{The number of values larger than 10 in the four registers $A$, $B$, $C$, $D$ in different cores, when they are written in parallel at the same time step, is never greater than 2.}
+
+{\footnotesize
+    \begin{center}
+        \begin{tabular}{@{}l l p{0.40\linewidth}@{}}
+            \toprule
+            \textbf{Entity}           & $t_e$   & $\mu_e$                               \\
+            \midrule
+            $A,\, B,\, C,\, D$        & Storage & $\{\mathit{register} \mapsto \top\}$  \\
+            $\mathit{ev\_written\_A}$ & Event   &
+            $\{\mathit{target} \mapsto id_A,\ \mathit{type} \mapsto \mathit{written}\}$ \\
+            $\mathit{ev\_written\_B}$ & Event   &
+            $\{\mathit{target} \mapsto id_B,\ \mathit{type} \mapsto \mathit{written}\}$ \\
+            $\mathit{ev\_written\_C}$ & Event   &
+            $\{\mathit{target} \mapsto id_C,\ \mathit{type} \mapsto \mathit{written}\}$ \\
+            $\mathit{ev\_written\_D}$ & Event   &
+            $\{\mathit{target} \mapsto id_D,\ \mathit{type} \mapsto \mathit{written}\}$ \\
+            \bottomrule
+        \end{tabular}
+    \end{center}
+}
+
+Let $\mathit{regs} = \{A,\, B,\, C,\, D\}$ be the set of register entities and $\mathit{writes}$ the set of their write events:
+{\footnotesize
+\begin{align*}
+    \mathit{writes} = \{\,
+     & \mathit{ev\_written\_A},     \\
+     & \mathit{ev\_written\_B},     \\
+     & \mathit{ev\_written\_C},     \\
+     & \mathit{ev\_written\_D} \,\}
+\end{align*}
+}
+With time set to the discrete flavour, the constraint is:
+{\footnotesize
+\begin{align*}
+    \mathit{Always}\Bigl(
+     & \mathit{ForAll}\bigl(\mathit{writes},\; \lambda e.\; \mathit{Happening}(e,\, \mathit{Now})\bigr) \;\Rightarrow{}          \\
+     & \quad \mathit{Cmp}\Bigl(
+    \mathit{Size}\bigl(\mathit{Filter}\bigl(\mathit{regs},\; \lambda e.\; \mathit{Val}_\rho(e,\, \mathit{Now}) > 10\bigr)\bigr), \\
+     & \qquad\qquad \leq,\; 2 \Bigr)
+    \Bigr)
+\end{align*}
+}
+
+The antecedent holds at a time step iff all four registers are written simultaneously; the consequent forms the subset of registers whose value exceeds 10 and bounds its cardinality at 2.
+
+%--------------------------------------------------------
+%--------------------------------------------------------
 \subsection{Known limitations and possible future extensions}\label{subsec:limitations}
 
 \textbf{Word order versus English syntax.} The formalism deliberately uses English words for its constructs, expressions, and predicates -- $\mathit{Always}$, $\mathit{Causes}$, $\mathit{MaxVal}$, $\mathit{Happening}$, and so on -- to keep individual identifiers recognisable to a human reader. The overall syntactic structure, however, is prefix function application throughout: every temporal construct, operation, and predicate places its head before its arguments. A requirement that reads in English as ``after receiving a MastershipInfo of BACKUP, the system shall operate as Backup'' becomes a nested $\mathit{Causes}(\dots,\, \dots)$ expression whose outer construct binds the cause-effect relation, with the trigger condition as the first argument and the consequence as the second. The mapping from English to the formalism is therefore not a near-monotonic substitution of words but a structural reorganisation. Human readers must mentally re-order the formalism back to natural English to verify it, and an LLM-based translator has to perform an explicit syntactic transformation rather than a token-level rewrite -- which is harder to learn, harder to evaluate, and prone to silent re-ordering errors that change the meaning.
