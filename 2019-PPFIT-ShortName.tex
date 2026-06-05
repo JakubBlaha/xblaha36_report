@@ -72,39 +72,38 @@
 
 	\Authors{Bc. Jakub Bláha}
 	\affiliation{*%
-		\href{mailto:herout@fit.vut.cz}{herout@fit.vut.cz},
+		\href{mailto:xblaha36@vutbr.cz}{xblaha36@vutbr.cz},
 		\textit{Faculty of Information Technology, Brno University of Technology}}
 
-	\Keywords{Keyword1 --- Keyword2 --- Keyword3}
+	\Keywords{NL-to-formal translation --- requirements formalisation --- test coverage gap detection --- formal specification language --- temporal logic --- large language models}
 
-	\Supplementary{\href{http://youtu.be/S3msCdn3fNM}{Demonstation video} --- \href{http://fit.vut.cz/}{Downloadable code}}
+	\Supplementary{\href{http://fit.vut.cz/}{Downloadable code -- TODO add gitea link}}
 
 	%--------------------------------------------------------
     %--------------------------------------------------------
     %	ABSTRACT
     %--------------------------------------------------------
     \Abstract{
-    Assessing whether a suite of test cases adequately covers a software
-    requirement is not trivial when both the requirement and its tests are
-    written in natural language, which is desirable because humans
-    understand requirements more easily that way. To apply existing
-    test-coverage techniques, both must first be rewritten into a precise,
-    mathematical form.
+    Software requirements and their test cases are often written in
+    natural language, which is easy for humans to read but cannot be
+    processed by formal verification tools directly. This work defines a
+    formal base intended as the target into which a large language model
+    rewrites natural-language requirements and test cases, making the
+    result machine-processable. While the formalism is motivated by
+    embedded-systems requirements, it is not limited to that domain.
     %
-    This work defines a formal base for expressing software requirements
-    and their test cases that sits as an intermediate layer between
-    natural language and the back-end logics used by verification tools.
-    Requirements and test cases are expressed over the same entities and
-    predicates, and the representation is logic-agnostic and close to
-    English, with constructs named after informal requirement vocabulary
-    yet tied to precise mathematical definitions. Because requirements
-    and test cases share one representation, a checker can mechanically
-    determine which requirement conditions are not exercised by any test,
-    while the logic-agnostic design lets a single formalised requirement
-    be retargeted to different verifiers without rewriting it. This work
-    focuses on defining the formalism itself and its formal properties,
-    rather than on the surrounding pipeline that translates natural
-    language into it or checks coverage against it.
+    The formalism is precisely defined mathematically and is designed to
+    be readable by LLMs: its constructs use English words rather than
+    mathematical symbols, which in theory helps models translate more
+    accurately. It is logic-agnostic and maps naturally to established
+    back-end tools -- including Linear Temporal Logic and timed automata
+    -- so a single formalised requirement can be retargeted to different
+    verifiers without rewriting. Requirements and test cases are expressed
+    using the same predicates, which makes it possible to detect coverage
+    gaps: conditions present in a requirement but not exercised by any
+    test case. The focus of this work is on defining the formalism and
+    its formal properties; the translation pipeline and the coverage
+    checker that consume it are left for future work.
     }
 \fi
 
