@@ -84,17 +84,27 @@
     %	ABSTRACT
     %--------------------------------------------------------
     \Abstract{
-    What is the problem? What is the topic? The aim of this paper?
-    \phony{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ullamcorper suscipit euismod. Mauris sed lectus non massa molestie congue. In hac habitasse platea dictumst.}
-    %	
-    How is the problem solved, the aim achieved (methodology)?
-    \phony{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ullamcorper suscipit euismod. Mauris sed lectus non massa molestie congue. In hac habitasse platea dictumst. Curabitur massa neque, commodo posuere fringilla ut, cursus at dui. Nulla quis purus a justo pellentesque.}
-    %	
-    What are the specific results? How well is the problem solved?
-    \phony{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ullamcorper suscipit euismod. Mauris sed lectus non massa molestie congue. In hac habitasse platea dictumst.}
-    %	
-    So what? How useful is this to Science and to the reader?
-    \phony{Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ullamcorper suscipit euismod.}
+    Assessing whether a suite of test cases adequately covers a software
+    requirement is not trivial when both the requirement and its tests are
+    written in natural language, which is desirable because humans
+    understand requirements more easily that way. To apply existing
+    test-coverage techniques, both must first be rewritten into a precise,
+    mathematical form.
+    %
+    This work defines a formal base for expressing software requirements
+    and their test cases that sits as an intermediate layer between
+    natural language and the back-end logics used by verification tools.
+    Requirements and test cases are expressed over the same entities and
+    predicates, and the representation is logic-agnostic and close to
+    English, with constructs named after informal requirement vocabulary
+    yet tied to precise mathematical definitions. Because requirements
+    and test cases share one representation, a checker can mechanically
+    determine which requirement conditions are not exercised by any test,
+    while the logic-agnostic design lets a single formalised requirement
+    be retargeted to different verifiers without rewriting it. This work
+    focuses on defining the formalism itself and its formal properties,
+    rather than on the surrounding pipeline that translates natural
+    language into it or checks coverage against it.
     }
 \fi
 
