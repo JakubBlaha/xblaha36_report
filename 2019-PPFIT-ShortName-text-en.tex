@@ -267,7 +267,7 @@ $\mathit{AllOf}\bigl(\{\mathit{Implies}(\mathit{Cmp}(A,\, =,\, \mathit{true}),\,
 %--------------------------------------------------------
 \subsection{Formalism definition}
 
-The complete formalism -- primitives, entity types, expressions, predicates, operations, temporal constructs, and the definition of a requirement and a test case -- is given in Appendix~\ref{app:formalism}. The remainder of this section refers to those definitions but does not reproduce them.
+The complete formalism -- primitives, entity types, expressions, predicates, operations, temporal constructs, and the definition of a requirement and a test case -- is given in Appendix~\ref{app:formalism} (source: \url{https://pajda.fit.vutbr.cz/xblaha36/llmpipeline-formalism}). The remainder of this section refers to those definitions but does not reproduce them.
 
 %--------------------------------------------------------
 %--------------------------------------------------------
@@ -471,6 +471,10 @@ The same requirements also admit an operational reading as timed automata. A dis
 
 \paragraph{Limits of the correspondence.}
 Not every construct maps onto these methods without cost. The set quantifiers $\mathit{ForAll}$ and $\mathit{Exists}$, together with $\mathit{Filter}$ and $\mathit{Size}$, range over a finite set of entities and are therefore first-order; they exceed propositional LTL and must be unrolled over the (finite) entity set before an LTL or automaton encoding applies. $\mathit{Sequence}$ and $\mathit{Precedes}$ are expressible in LTL but expand into nested operators whose size grows with the number of stages. And $\mathit{Causes}$, with its unbounded eventuality, has no finite-clock timed-automaton equivalent: a liveness (acceptance) condition is required rather than a safety construction. These cases remain expressible, but the translation is no longer a one-to-one substitution.
+
+\subsection{Validator}
+
+A validator has been implemented for requirements and test cases written in a Python-based implementation of the formalism. It takes as input Python representations of requirements and test cases derived from the formalism and checks their structural validity. The source is available at \url{https://pajda.fit.vutbr.cz/xblaha36/llmpipeline-validator}.
 
 \section{Conclusions}
 %--------------------------------------------------------
