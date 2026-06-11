@@ -249,7 +249,12 @@ A matching test case fires two sensor failures within ten seconds and asserts th
 \textbf{Conjunction, disjunction, and negation of predicates.} The formalism shall combine predicates of any kind (event happenings, value comparisons, occurrence counts, historical values) into a single conjunctive or disjunctive guard, and shall negate any predicate. \textit{Example:} ``$e_A$ and $B > 100$ and $e_C$ has occurred at least twice''; ``$e_A$ or $e_B$ or $e_C$''; or ``$A$ is not equal to $B$''. \textit{Solution:} $\mathit{AllOf}$, $\mathit{AnyOf}$, and $\mathit{Not}$ form the conjunction, disjunction, and negation of predicates drawn from the shared predicate space.
 
 \textbf{Value-conditional branches.} The formalism shall support constraints that branch on the current value of an entity. \textit{Example:} ``If $A$ is true then $B$ equals $X$; otherwise $B$ equals $Y$.'' \textit{Solution:} A value-guarded branch is expressed as the conjunction of two implications using $\mathit{AllOf}$, $\mathit{Implies}$, and the comparison predicate $\mathit{Cmp}$, for example:
-$\mathit{AllOf}\bigl(\{\mathit{Implies}(\mathit{Cmp}(A,\, =,\, \mathit{true}),\, \mathit{Cmp}(B,\, =,\, X)),\; \mathit{Implies}(\mathit{Cmp}(A,\, =,\, \mathit{false}),\, \mathit{Cmp}(B,\, =,\, Y))\}\bigr)$.
+\begin{multline*}
+\mathit{AllOf}\bigl(\{\\
+  \mathit{Implies}(\mathit{Cmp}(A,\, =,\, \mathit{true}),\, \mathit{Cmp}(B,\, =,\, X)),\\
+  \mathit{Implies}(\mathit{Cmp}(A,\, =,\, \mathit{false}),\, \mathit{Cmp}(B,\, =,\, Y))\\
+\}\bigr).
+\end{multline*}
 
 \textbf{Sets, set membership, and set quantification.} The formalism shall represent finite sets of values, test whether a value belongs to a set, quantify over a finite set of entities, and reason about properties of the subset that satisfies a predicate. \textit{Example:} ``the value $v$ belongs to set $S$''; ``for every entity in $\{A, B, C, D\}$, predicate $P$ holds''; or ``at most two entities in $\{A, B, C, D\}$ have a value greater than $10$.'' \textit{Solution:} The Set entity kind carries set values; $\mathit{Contains}$ tests membership; the quantifiers $\mathit{ForAll}(S,\, P)$ and $\mathit{Exists}(S,\, P)$ range over a finite set, with $\mathit{Filter}$ and $\mathit{Size}$ supporting cardinality reasoning over the subset satisfying a predicate.
 
