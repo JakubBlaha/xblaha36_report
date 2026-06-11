@@ -33,7 +33,7 @@ clean-formalism:
 	cd $(FORM_DIR) && latexmk -C $(FORM).tex
 
 pack:
-	tar czvf $(CO).tar.gz *.tex *.bib *.bst ./images/* $(CO).pdf Makefile
+	tar czvf $(CO).tar.gz *.tex *.bib *.bst ./images/* $(CO).pdf Makefile formalism/tex-new/doc.tex formalism/tex-new/formalism.tex pdf/doc.pdf
 
 vlna:
 	vlna -l *.tex
