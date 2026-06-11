@@ -1,5 +1,5 @@
 # makefile for compilation
-CO=2019-PPFIT-ShortName
+CO=PPFIT-llmpipeline-formalism
 FORM_DIR=formalism/tex-new
 FORM=doc
 
